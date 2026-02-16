@@ -118,7 +118,7 @@ def server_loop(local_host, local_port, remote_host, remote_port, receive_first)
         server.bind((local_host, local_port))
     except socket.error as e:
         print(f"[-] Failed to bind to {local_host}:{local_port}")
-        print(f"[-] Ensure no other processes are using the port.")
+        print("[-] Ensure no other processes are using the port.")
         print(f"Error: {e}")
         sys.exit(1)
 
@@ -135,5 +135,35 @@ def server_loop(local_host, local_port, remote_host, remote_port, receive_first)
             target=proxy_handler,
             args=(client_socket, remote_host, remote_port, receive_first),
         )
-        proxy_thread = threading.Thread(target=proxy_handler, args=(client_socket, remote_host, remote_port, receive_first))
+        proxy_thread = threading.Thread(
+            target=proxy_handler,
+            args=(client_socket, remote_host, remote_port, receive_first),
+        )
         proxy_thread.start()
+
+
+def main():
+    """Main function to parse arguments and start the proxy server."""
+
+    if len(sys.argv[1:]) != 5:
+        print(
+            "Usage: ./tcp-proxy.py [localhost] [localport] [remotehost] [remoteport] [receive_first]"
+        )
+        print("Example: ./tcp-proxy.py 127.0.0.1 9000 10.12.132.1 9000 True")
+        sys.exit(1)
+
+    # assign command-line arguments
+    local_host = sys.argv[1]
+    local_port = int(sys.argv[2])
+    remote_host = sys.argv[3]
+    remote_port = int(sys.argv[4])
+
+    # convert string "True" or "False" to boolean
+    receive_first = sys.argv[5].lower() == "true"
+
+    # start the server loop
+    server_loop(local_host, local_port, remote_host, remote_port, receive_first)
+
+
+if __name__ == "__main__":
+    main()
